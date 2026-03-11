@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pam's Farm Time Clock</title>
+
+  <!-- PWA meta -->
+  <meta name="theme-color" content="#2d6a4f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pam's Farm" />
+  <meta name="application-name" content="Pam's Farm Time Clock" />
+  <meta name="description" content="Offline time clock app for Pam's Farm employees" />
+
+  <!-- Apple touch icons -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png" />
+
+  <!-- Standard icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Loading splash -->
+<div id="loading">
+  <img src="icons/icon-192.png" alt="Logo" />
+  <p>Loading...</p>
+</div>
+
+<!-- App shell (hidden until ready) -->
+<div id="app" style="display:none">
+
+  <!-- Header -->
+  <div id="header">
+    <img src="icons/icon-192.png" alt="Pam's Farm Logo" />
+    <h1>Pam's Farm Time Clock</h1>
+  </div>
+
+  <!-- ── Home Screen ── -->
+  <div id="home-screen" class="screen">
+
+    <div class="logo-container">
+      <img src="icons/icon-192.png" alt="Pam's Farm" />
+    </div>
+
+    <div class="time-container">
+      <div id="current-time">00:00:00</div>
+      <div id="current-date"></div>
+    </div>
+
+    <div class="status-container">
+      <div id="status-badge" class="status-badge clocked-out">○ CLOCKED OUT</div>
+      <div id="clock-in-since"></div>
+      <div id="last-punch"></div>
+    </div>
+
+    <div class="button-container">
+      <button id="clock-in-btn" class="punch-btn">CLOCK IN</button>
+      <button id="clock-out-btn" class="punch-btn" disabled>CLOCK OUT</button>
+    </div>
+
+  </div><!-- /home-screen -->
+
+  <!-- ── Timesheet Screen ── -->
+  <div id="timesheet-screen" class="screen">
+
+    <div class="week-nav">
+      <button id="prev-week-btn" class="week-nav-btn" title="Previous week">‹</button>
+      <span id="week-label"></span>
+      <button id="next-week-btn" class="week-nav-btn" title="Next week">›</button>
+    </div>
+
+    <div id="timesheet-content" class="timesheet-content"></div>
+
+  </div><!-- /timesheet-screen -->
+
+  <!-- ── Tab Nav ── -->
+  <nav id="tab-nav">
+    <button id="home-tab" class="tab-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Time Clock
+    </button>
+    <button id="timesheet-tab" class="tab-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Timesheet
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- ── Modals ── -->
+
+<!-- Name Setup Modal -->
+<div id="name-modal" class="modal-overlay">
+  <div id="name-modal-box" class="modal-box">
+    <img src="icons/icon-192.png" alt="Logo" />
+    <div class="welcome-title">Welcome to</div>
+    <div class="app-name">Pam's Farm<br>Time Clock</div>
+    <div class="welcome-sub">
+      Please enter your full name.<br>
+      This will appear on your timesheet exports.
+    </div>
+    <input
+      type="text"
+      id="name-input"
+      placeholder="Full Name"
+      autocomplete="name"
+      autocorrect="off"
+    />
+    <div id="name-error" class="form-error"></div>
+    <button id="name-save" class="modal-btn modal-btn-green" style="width:100%;margin-top:16px">
+      Get Started
+    </button>
+  </div>
+</div>
+
+<!-- Clock Out Notes Modal -->
+<div id="notes-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">Clock Out Notes</div>
+    <div class="modal-subtitle">What were you working on? (optional)</div>
+    <textarea id="notes-input" placeholder="Enter notes about your work..."></textarea>
+    <div class="modal-buttons">
+      <button id="notes-cancel" class="modal-btn modal-btn-cancel">Cancel</button>
+      <button id="notes-confirm" class="modal-btn modal-btn-confirm">Clock Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Entry Modal -->
+<div id="entry-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div id="entry-modal-title" class="modal-title">Add Time Entry</div>
+    <div id="entry-date" class="modal-subtitle"></div>
+
+    <div class="form-row">
+      <label class="form-label" for="entry-clock-in">Clock In</label>
+      <input type="time" id="entry-clock-in" />
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="entry-clock-out">Clock Out</label>
+      <input type="time" id="entry-clock-out" />
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="entry-notes">Notes (optional)</label>
+      <textarea id="entry-notes" placeholder="Notes about this shift..."></textarea>
+    </div>
+    <div id="entry-error" class="form-error"></div>
+
+    <div class="modal-buttons">
+      <button id="entry-cancel" class="modal-btn modal-btn-cancel">Cancel</button>
+      <button id="entry-confirm-btn" class="modal-btn modal-btn-green">Add Entry</button>
+    </div>
+
+    <div class="delete-row" id="entry-delete" style="display:none">
+      <button class="delete-link">Delete this entry</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

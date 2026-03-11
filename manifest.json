@@ -1,0 +1,16 @@
+{
+  "name": "Pam's Farm Time Clock",
+  "short_name": "Farm Clock",
+  "description": "Time clock and timesheet tracker for Pam's Farm",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#2d6a4f",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icons/icon-120.png", "sizes": "120x120", "type": "image/png" },
+    { "src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
